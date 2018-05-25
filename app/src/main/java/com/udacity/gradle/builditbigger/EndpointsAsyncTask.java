@@ -8,20 +8,20 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
-import com.i4creed.jokeactivity.JokeActivity;
 import com.udacity.gradle.builditbigger.backend.myApi.MyApi;
 
 import java.io.IOException;
 
 /**
+ * This AsyncTask fetches data from google cloud endpoint.
  * Created by felix on 25-May-18 at 16:47.
  */
-class EndpointsAsyncTask extends AsyncTask<Context, Void, String> {
+public class EndpointsAsyncTask extends AsyncTask<Void, Void, String> {
     private static MyApi myApiService = null;
-    private Context context;
+    OnFinishedListener listener;
 
     @Override
-    protected String doInBackground(Context... context) {
+    protected String doInBackground(Void... voids) {
         if (myApiService == null) {  // Only do this once
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null)
@@ -39,7 +39,6 @@ class EndpointsAsyncTask extends AsyncTask<Context, Void, String> {
 
             myApiService = builder.build();
         }
-        this.context = context[0];
         try {
             return myApiService.getJoke().execute().getData();
         } catch (IOException e) {
@@ -47,10 +46,24 @@ class EndpointsAsyncTask extends AsyncTask<Context, Void, String> {
         }
     }
 
+    public void setListener(OnFinishedListener listener) {
+        this.listener = listener;
+    }
+
+
     @Override
     protected void onPostExecute(String result) {
-        Intent intent = new Intent(context, JokeActivity.class);
-        intent.putExtra(context.getString(R.string.joke_intent_key), result);
-        context.startActivity(intent);
+        listener.onFinished(result);
+    }
+
+    /**
+     * Listener for finishing AsyncTask.
+     */
+    public interface OnFinishedListener {
+        /**
+         * Called when AsyncTask is finished.
+         * @param result of AsyncTask.
+         */
+        void onFinished(String result);
     }
 }
