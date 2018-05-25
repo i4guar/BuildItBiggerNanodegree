@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Joke Activity</string>
+    <string name="joke_intent_key">com.i4creed.jokeactivity.joke_intent_key</string>
+</resources>
